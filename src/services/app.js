@@ -1,9 +1,8 @@
-// src/services/api.js
+// src/services/app.js
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Create axios instance
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -11,7 +10,6 @@ const api = axios.create({
   },
 });
 
-// Request interceptor - add token to requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -20,12 +18,9 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor - handle errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -38,7 +33,6 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
@@ -46,22 +40,22 @@ export const authAPI = {
   logout: () => api.post('/auth/logout'),
 };
 
-// Product API
 export const productAPI = {
   createProduct: (data) => api.post('/products', data),
   getProducts: (params) => api.get('/products', { params }),
   getProductById: (id) => api.get(`/products/${id}`),
   getQRCode: (id) => api.get(`/products/${id}/qrcode`),
-  verifyProduct: (hash, data) => api.post(`/products/verify/${hash}`, data),
   
-  // Aliases for compatibility
+  // ĐÃ SỬA: Gửi toàn bộ data trong body
+  verifyProduct: (data) => api.post('/products/verify', data),
+  getProductByHash: (hash) => api.get(`/products/hash/${hash}`),
+  // Aliases
   getAll: (params) => api.get('/products', { params }),
   getById: (id) => api.get(`/products/${id}`),
   create: (data) => api.post('/products', data),
-  verify: (hash, data) => api.post(`/products/verify/${hash}`, data),
+  verify: (data) => api.post('/products/verify', data), // giữ alias
 };
 
-// Stats API
 export const statsAPI = {
   getStats: () => api.get('/stats'),
 };

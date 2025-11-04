@@ -90,7 +90,9 @@ function App() {
           }
         />
         
-        <Route path="/verify" element={<VerifyProduct />} />
+        <Route path="/verify/:hash" element={<VerifyProduct />} />
+
+
 
         {/* Protected Routes */}
         <Route

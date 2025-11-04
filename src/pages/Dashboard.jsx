@@ -51,15 +51,17 @@ export default function Dashboard() {
   }, []);
 
   const loadStats = async () => {
-    try {
-      const { data } = await statsAPI.getStats();
-      setStats(data);
-    } catch (error) {
-      toast.error('Không thể tải thống kê');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const { data } = await statsAPI.getStats();
+    console.log('DATA TỪ BACKEND:', data); // THÊM DÒNG NÀY
+    setStats(data);
+  } catch (error) {
+    console.error('Lỗi tải stats:', error);
+    toast.error('Không thể tải thống kê');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleLogout = () => {
     logout();
@@ -68,47 +70,58 @@ export default function Dashboard() {
   };
 
   const statCards = [
-    {
-      title: 'Tổng sản phẩm',
-      value: stats?.totalProducts || 0,
-      icon: Package,
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      change: '+12.5%',
-      trend: 'up',
-    },
-    {
-      title: 'Lượt xác thực',
-      value: stats?.totalVerifications || 0,
-      icon: ShieldCheck,
-      color: 'from-green-500 to-green-600',
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600',
-      change: '+23.1%',
-      trend: 'up',
-    },
-    {
-      title: 'Người dùng',
-      value: stats?.totalUsers || 0,
-      icon: Users,
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600',
-      change: '+8.2%',
-      trend: 'up',
-    },
-    {
-      title: 'Tỷ lệ chính hãng',
-      value: '98.7%',
-      icon: Activity,
-      color: 'from-orange-500 to-orange-600',
-      bgColor: 'bg-orange-50',
-      iconColor: 'text-orange-600',
-      change: '-1.2%',
-      trend: 'down',
-    },
-  ];
+  {
+    title: 'Tổng sản phẩm',
+    value: stats?.totalProducts?.toLocaleString() || '0',
+    icon: Package,
+    color: 'from-blue-500 to-blue-600',
+    bgColor: 'bg-blue-50',
+    iconColor: 'text-blue-600',
+    change: '+12.5%',
+    trend: 'up',
+    onClick: () => navigate('/products'),
+  },
+  {
+    title: 'Lượt xác thực',
+    value: stats?.totalVerifications?.toLocaleString() || '0',
+    icon: ShieldCheck,
+    color: 'from-green-500 to-green-600',
+    bgColor: 'bg-green-50',
+    iconColor: 'text-green-600',
+    change: '+23.1%',
+    trend: 'up',
+  },
+  {
+    title: 'Người dùng',
+    value: stats?.totalUsers || '0',
+    icon: Users,
+    color: 'from-purple-500 to-purple-600',
+    bgColor: 'bg-purple-50',
+    iconColor: 'text-purple-600',
+    change: '+8.2%',
+    trend: 'up',
+  },
+  {
+    title: 'Tỷ lệ chính hãng',
+    value: stats?.authenticityRate || '100%',
+    icon: TrendingUp,
+    color: 'from-orange-500 to-red-500',
+    bgColor: 'bg-orange-50',
+    iconColor: 'text-orange-600',
+    change: '-1.2%',
+    trend: 'down',
+  },
+  {
+    title: 'Lượt quét hôm nay',
+    value: stats?.todayVerifications?.toLocaleString() || '0',
+    icon: Activity,
+    color: 'from-indigo-500 to-indigo-600',
+    bgColor: 'bg-indigo-50',
+    iconColor: 'text-indigo-600',
+    change: '+18.3%',
+    trend: 'up',
+  },
+];
 
   if (loading) {
     return (
@@ -135,6 +148,12 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/products')}
+                className="px-6 py-3 bg-white text-primary-600 border-2 border-primary-500 rounded-xl font-semibold hover:bg-primary-50 transform hover:scale-105 transition-all duration-200"
+              >
+                📦 Danh sách sản phẩm
+              </button>
               <button
                 onClick={() => navigate('/products/create')}
                 className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-700 text-white rounded-xl font-semibold hover:shadow-xl transform hover:scale-105 transition-all duration-200"
@@ -166,7 +185,7 @@ export default function Dashboard() {
                       <p className="text-xs text-primary-600 mt-1">Role: {user?.role || 'User'}</p>
                     </div>
                     
-                    <button
+                    {/* <button
                       onClick={() => {
                         setShowUserMenu(false);
                         navigate('/profile');
@@ -175,7 +194,7 @@ export default function Dashboard() {
                     >
                       <User className="w-4 h-4 text-gray-600" />
                       <span className="text-sm text-gray-700">Hồ sơ cá nhân</span>
-                    </button>
+                    </button> */}
 
                     <div className="border-t border-gray-100 my-2"></div>
 
@@ -200,7 +219,10 @@ export default function Dashboard() {
           {statCards.map((stat, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
+              onClick={stat.onClick}
+              className={`bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 ${
+                stat.onClick ? 'cursor-pointer' : ''
+              }`}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className={`w-14 h-14 ${stat.bgColor} rounded-xl flex items-center justify-center`}>
@@ -314,23 +336,46 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">Hoạt động gần đây</h2>
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900">Sản phẩm được xác thực</p>
-                  <p className="text-sm text-gray-500">iPhone 15 Pro Max - Batch #12345</p>
-                </div>
-                <span className="text-sm text-gray-500">2 phút trước</span>
-              </div>
-            ))}
+        {/* HOẠT ĐỘNG GẦN ĐÂY – DỮ LIỆU THẬT 100% */}
+<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+  <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+    <Activity className="w-5 h-5 text-emerald-600" />
+    Hoạt động gần đây
+  </h2>
+
+  {stats?.recentVerifications && stats.recentVerifications.length > 0 ? (
+    <div className="space-y-4">
+      {stats.recentVerifications.map((v) => (
+        <div
+          key={v.id}
+          className="flex items-center gap-4 p-4 hover:bg-emerald-50 rounded-xl transition-all duration-200 border border-emerald-100"
+        >
+          <div className="w-11 h-11 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+            <ShieldCheck className="w-6 h-6 text-white" />
           </div>
+          <div className="flex-1">
+            <p className="font-bold text-gray-900 text-sm">
+              {v.productName} - {v.batchNumber}
+            </p>
+            <p className="text-xs text-gray-500">
+              {v.location || 'Việt Nam'} • {v.deviceInfo?.split(' ')[0] || 'Mobile'}
+            </p>
+          </div>
+          <span className="text-xs text-gray-500 font-medium">
+            {new Date(v.verifiedAt).toLocaleTimeString('vi-VN', {
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
         </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-center text-gray-400 py-8 text-sm">
+      Chưa có hoạt động nào
+    </p>
+  )}
+</div>
       </div>
 
       {/* Click outside to close menu */}
