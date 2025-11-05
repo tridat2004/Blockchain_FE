@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -8,6 +7,8 @@ import {
   LayoutDashboard,
   Package,
   ShieldCheck,
+  ShieldAlert,
+  ShieldX,
   Users,
   TrendingUp,
   Activity,
@@ -15,6 +16,11 @@ import {
   ArrowDownRight,
   LogOut,
   User,
+  Plus,
+  Eye,
+
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -24,44 +30,49 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  // Mock data for charts
-  const verificationData = [
-    { name: 'T1', value: 120 },
-    { name: 'T2', value: 198 },
-    { name: 'T3', value: 156 },
-    { name: 'T4', value: 245 },
-    { name: 'T5', value: 289 },
-    { name: 'T6', value: 324 },
-    { name: 'T7', value: 378 },
-  ];
-
-  const productData = [
-    { name: 'T1', authentic: 45, fake: 2 },
-    { name: 'T2', authentic: 52, fake: 1 },
-    { name: 'T3', authentic: 48, fake: 3 },
-    { name: 'T4', authentic: 67, fake: 0 },
-    { name: 'T5', authentic: 72, fake: 2 },
-    { name: 'T6', authentic: 81, fake: 1 },
-    { name: 'T7', authentic: 89, fake: 1 },
-  ];
+  const [chartData, setChartData] = useState({
+    verifications: [],
+    products: []
+  });
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await statsAPI.getChartData();
+        const days = Array.isArray(data?.last7Days) ? data.last7Days : [];
+
+        setChartData({
+          verifications: days.map(d => ({
+            name: d.day || '',
+            value: Number(d.total) || 0
+          })),
+          products: days.map(d => ({
+            name: d.day || '',
+            authentic: Number(d.authentic) || 0,
+            fake: Number(d.fake) || 0
+          }))
+        });
+      } catch (err) {
+        console.error('Error loading chart:', err);
+        toast.error('Không thể tải dữ liệu biểu đồ');
+      }
+    };
+
     loadStats();
+    fetchData();
   }, []);
 
   const loadStats = async () => {
-  try {
-    const { data } = await statsAPI.getStats();
-    console.log('DATA TỪ BACKEND:', data); // THÊM DÒNG NÀY
-    setStats(data);
-  } catch (error) {
-    console.error('Lỗi tải stats:', error);
-    toast.error('Không thể tải thống kê');
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const { data } = await statsAPI.getStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      toast.error('Không thể tải thống kê');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -72,18 +83,17 @@ export default function Dashboard() {
   const statCards = [
   {
     title: 'Tổng sản phẩm',
-    value: stats?.totalProducts?.toLocaleString() || '0',
+    value: stats?.totalProducts || 0,
     icon: Package,
     color: 'from-blue-500 to-blue-600',
     bgColor: 'bg-blue-50',
     iconColor: 'text-blue-600',
     change: '+12.5%',
     trend: 'up',
-    onClick: () => navigate('/products'),
   },
   {
     title: 'Lượt xác thực',
-    value: stats?.totalVerifications?.toLocaleString() || '0',
+    value: stats?.totalVerifications || 0,
     icon: ShieldCheck,
     color: 'from-green-500 to-green-600',
     bgColor: 'bg-green-50',
@@ -92,299 +102,183 @@ export default function Dashboard() {
     trend: 'up',
   },
   {
-    title: 'Người dùng',
-    value: stats?.totalUsers || '0',
-    icon: Users,
-    color: 'from-purple-500 to-purple-600',
-    bgColor: 'bg-purple-50',
-    iconColor: 'text-purple-600',
-    change: '+8.2%',
+    title: 'Sản phẩm chính hãng',
+    value: stats?.totalAuthentic || 0,
+    icon: CheckCircle,
+    color: 'from-emerald-500 to-emerald-600',
+    bgColor: 'bg-emerald-50',
+    iconColor: 'text-emerald-600',
+    change: '+18%',
     trend: 'up',
   },
   {
-    title: 'Tỷ lệ chính hãng',
-    value: stats?.authenticityRate || '100%',
-    icon: TrendingUp,
-    color: 'from-orange-500 to-red-500',
-    bgColor: 'bg-orange-50',
-    iconColor: 'text-orange-600',
-    change: '-1.2%',
+    title: 'Phát hiện giả mạo',
+    value: stats?.totalFake || 0,
+    icon: AlertTriangle,
+    color: 'from-red-500 to-red-600',
+    bgColor: 'bg-red-50',
+    iconColor: 'text-red-600',
+    change: stats?.totalFake > 0 ? '+' + stats.totalFake : '0',
     trend: 'down',
-  },
-  {
-    title: 'Lượt quét hôm nay',
-    value: stats?.todayVerifications?.toLocaleString() || '0',
-    icon: Activity,
-    color: 'from-indigo-500 to-indigo-600',
-    bgColor: 'bg-indigo-50',
-    iconColor: 'text-indigo-600',
-    change: '+18.3%',
-    trend: 'up',
   },
 ];
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg">
-                <LayoutDashboard className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-sm text-gray-500">Chào mừng trở lại, {user?.fullName}</p>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      {/* HEADER */}
+      <div className="bg-white border-b-2 border-gray-200 shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl">
+              <LayoutDashboard className="w-9 h-9 text-white" />
             </div>
-            
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/products')}
-                className="px-6 py-3 bg-white text-primary-600 border-2 border-primary-500 rounded-xl font-semibold hover:bg-primary-50 transform hover:scale-105 transition-all duration-200"
-              >
-                📦 Danh sách sản phẩm
-              </button>
-              <button
-                onClick={() => navigate('/products/create')}
-                className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-700 text-white rounded-xl font-semibold hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-              >
-                + Tạo sản phẩm
-              </button>
-
-              {/* User Menu */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-3 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200"
-                >
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="text-left hidden sm:block">
-                    <p className="text-sm font-semibold text-gray-900">{user?.fullName}</p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
-                  </div>
-                </button>
-
-                {/* Dropdown Menu */}
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-900">{user?.fullName}</p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
-                      <p className="text-xs text-primary-600 mt-1">Role: {user?.role || 'User'}</p>
-                    </div>
-                    
-                    {/* <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        navigate('/profile');
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
-                    >
-                      <User className="w-4 h-4 text-gray-600" />
-                      <span className="text-sm text-gray-700">Hồ sơ cá nhân</span>
-                    </button> */}
-
-                    <div className="border-t border-gray-100 my-2"></div>
-
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-left"
-                    >
-                      <LogOut className="w-4 h-4 text-red-600" />
-                      <span className="text-sm text-red-600 font-semibold">Đăng xuất</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-base text-gray-600 font-medium">
+                Chào mừng trở lại, {user?.username || user?.email}
+              </p>
             </div>
+          </div>
+
+          {/* User + Buttons */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/products')}
+              className="px-6 py-3.5 bg-white border-2 border-blue-500 text-blue-600 rounded-2xl font-bold hover:bg-blue-50 transform hover:scale-105 transition-all shadow-lg flex items-center gap-2"
+            >
+              <Eye className="w-5 h-5" />
+              Danh sách sản phẩm
+            </button>
+            <button
+              onClick={() => navigate('/products/create')}
+              className="px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl font-bold hover:shadow-2xl transform hover:scale-105 transition-all flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Tạo sản phẩm
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-10">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
           {statCards.map((stat, index) => (
             <div
               key={index}
               onClick={stat.onClick}
-              className={`bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 ${
+              className={`bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-gray-100 ${
                 stat.onClick ? 'cursor-pointer' : ''
               }`}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-14 h-14 ${stat.bgColor} rounded-xl flex items-center justify-center`}>
-                  <stat.icon className={`w-7 h-7 ${stat.iconColor}`} />
+              <div className="flex items-center justify-between mb-6">
+                <div className={`w-16 h-16 ${stat.bgColor} rounded-2xl flex items-center justify-center shadow-lg`}>
+                  <stat.icon className={`w-9 h-9 ${stat.iconColor}`} />
                 </div>
-                <div className={`flex items-center gap-1 text-sm font-semibold ${
-                  stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                <div className={`flex items-center gap-1.5 text-base font-bold ${
+                  stat.trend === 'up' ? 'text-emerald-600' : 'text-red-600'
                 }`}>
                   {stat.trend === 'up' ? (
-                    <ArrowUpRight className="w-4 h-4" />
+                    <ArrowUpRight className="w-5 h-5" />
                   ) : (
-                    <ArrowDownRight className="w-4 h-4" />
+                    <ArrowDownRight className="w-5 h-5" />
                   )}
                   {stat.change}
                 </div>
               </div>
-              <h3 className="text-gray-600 text-sm font-medium mb-2">{stat.title}</h3>
-              <p className="text-3xl font-bold text-gray-900">{stat.value.toLocaleString()}</p>
+              <h3 className="text-gray-600 text-base font-semibold mb-3">{stat.title}</h3>
+              <p className="text-4xl font-bold text-gray-900">{stat.value.toLocaleString()}</p>
             </div>
           ))}
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
           {/* Verification Trend */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900">Xu hướng xác thực</h2>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-green-500" />
-                <span className="text-sm font-semibold text-green-600">+23.1%</span>
-              </div>
-            </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={verificationData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
+          <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">Xu hướng xác thực</h2>
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={chartData.verifications || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="#0ea5e9" 
-                  strokeWidth={3}
-                  fill="url(#colorValue)" 
-                />
+                <XAxis dataKey="name" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip />
+                <Area type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={3} fill="#bae6fd" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
           {/* Product Statistics */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900">Thống kê sản phẩm</h2>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Chính hãng</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Giả mạo</span>
-                </div>
-              </div>
-            </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={productData}>
+          <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">Thống kê sản phẩm</h2>
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={chartData.products || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="authentic" 
-                  stroke="#22c55e" 
-                  strokeWidth={3}
-                  dot={{ fill: '#22c55e', r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="fake" 
-                  stroke="#ef4444" 
-                  strokeWidth={3}
-                  dot={{ fill: '#ef4444', r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
+                <XAxis dataKey="name" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip />
+                <Line type="monotone" dataKey="authentic" stroke="#22c55e" strokeWidth={3} />
+                <Line type="monotone" dataKey="fake" stroke="#ef4444" strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Recent Activity */}
-        {/* HOẠT ĐỘNG GẦN ĐÂY – DỮ LIỆU THẬT 100% */}
-<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-  <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-    <Activity className="w-5 h-5 text-emerald-600" />
-    Hoạt động gần đây
-  </h2>
-
-  {stats?.recentVerifications && stats.recentVerifications.length > 0 ? (
-    <div className="space-y-4">
-      {stats.recentVerifications.map((v) => (
-        <div
-          key={v.id}
-          className="flex items-center gap-4 p-4 hover:bg-emerald-50 rounded-xl transition-all duration-200 border border-emerald-100"
+       
+<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 animate-fade-in">
+  <h2 className="text-lg font-bold text-gray-900 mb-6">Hoạt động gần đây</h2>
+  <div className="space-y-4">
+    {stats?.recentVerifications && stats.recentVerifications.length > 0 ? (
+      stats.recentVerifications.map((verification) => (
+        <div 
+          key={verification.id} 
+          className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${
+            verification.isAuthentic 
+              ? 'hover:bg-green-50 border border-green-100' 
+              : 'hover:bg-red-50 border border-red-100'
+          }`}
         >
-          <div className="w-11 h-11 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-            <ShieldCheck className="w-6 h-6 text-white" />
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+            verification.isAuthentic 
+              ? 'bg-green-500' 
+              : 'bg-red-500'
+          }`}>
+            {verification.isAuthentic ? (
+              <ShieldCheck className="w-6 h-6 text-white" />
+            ) : (
+              <ShieldAlert className="w-6 h-6 text-white" />
+            )}
           </div>
           <div className="flex-1">
-            <p className="font-bold text-gray-900 text-sm">
-              {v.productName} - {v.batchNumber}
+            <p className={`font-semibold ${
+              verification.isAuthentic ? 'text-green-900' : 'text-red-900'
+            }`}>
+              {verification.isAuthentic ? '✅ Sản phẩm chính hãng' : '⚠️ Phát hiện giả mạo'}
             </p>
-            <p className="text-xs text-gray-500">
-              {v.location || 'Việt Nam'} • {v.deviceInfo?.split(' ')[0] || 'Mobile'}
+            <p className="text-sm text-gray-500">
+              {verification.productName} - {verification.batchNumber}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              {verification.location} • {new Date(verification.verifiedAt).toLocaleString('vi-VN')}
             </p>
           </div>
-          <span className="text-xs text-gray-500 font-medium">
-            {new Date(v.verifiedAt).toLocaleTimeString('vi-VN', {
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-          </span>
         </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-center text-gray-400 py-8 text-sm">
-      Chưa có hoạt động nào
-    </p>
-  )}
+      ))
+    ) : (
+      <p className="text-center text-gray-500 py-8">Chưa có hoạt động nào</p>
+    )}
+  </div>
 </div>
       </div>
-
-      {/* Click outside to close menu */}
-      {showUserMenu && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setShowUserMenu(false)}
-        ></div>
-      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productAPI } from '../services/app';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Package, Building2, Hash, Calendar, FileText, Loader } from 'lucide-react';
+import { ArrowLeft, Package, Building2, Hash, Calendar, FileText, Loader, CheckCircle } from 'lucide-react';
 
 export default function CreateProduct() {
   const navigate = useNavigate();
@@ -39,38 +39,38 @@ export default function CreateProduct() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      {/* HEADER */}
+      <div className="bg-white border-b-2 border-gray-200 shadow-lg">
+        <div className="max-w-5xl mx-auto px-6 py-6">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4"
+            className="group flex items-center gap-3 mb-4 px-4 py-2 hover:bg-gray-100 rounded-2xl transition-all"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Quay lại Dashboard</span>
+            <ArrowLeft className="w-5 h-5 text-gray-600 group-hover:text-gray-900" />
+            <span className="font-bold text-gray-600 group-hover:text-gray-900">Quay lại Dashboard</span>
           </button>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg">
-              <Package className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-xl">
+              <Package className="w-9 h-9 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Tạo sản phẩm mới</h1>
-              <p className="text-sm text-gray-500">Thêm sản phẩm vào blockchain</p>
+              <h1 className="text-3xl font-bold text-gray-900">Tạo sản phẩm mới</h1>
+              <p className="text-base text-gray-600 font-medium">Thêm sản phẩm vào blockchain</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Form */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 animate-fade-in">
-          <form onSubmit={handleSubmit} className="space-y-6">
+      {/* FORM */}
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <div className="bg-white rounded-3xl shadow-2xl p-10 border-2 border-gray-100">
+          <form onSubmit={handleSubmit} className="space-y-8">
             {/* Product Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4" />
+              <label className="block text-base font-bold text-gray-700 mb-3">
+                <div className="flex items-center gap-3">
+                  <Package className="w-5 h-5 text-blue-600" />
                   Tên sản phẩm *
                 </div>
               </label>
@@ -80,16 +80,16 @@ export default function CreateProduct() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="block w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all duration-200"
+                className="block w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-base font-medium"
                 placeholder="VD: iPhone 15 Pro Max 256GB"
               />
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
+              <label className="block text-base font-bold text-gray-700 mb-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-purple-600" />
                   Mô tả
                 </div>
               </label>
@@ -98,18 +98,18 @@ export default function CreateProduct() {
                 value={formData.description}
                 onChange={handleChange}
                 rows={4}
-                className="block w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all duration-200 resize-none"
+                className="block w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all resize-none text-base font-medium"
                 placeholder="Mô tả chi tiết về sản phẩm..."
               />
             </div>
 
             {/* Grid 2 columns */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Manufacturer */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4" />
+                <label className="block text-base font-bold text-gray-700 mb-3">
+                  <div className="flex items-center gap-3">
+                    <Building2 className="w-5 h-5 text-emerald-600" />
                     Nhà sản xuất *
                   </div>
                 </label>
@@ -119,16 +119,16 @@ export default function CreateProduct() {
                   value={formData.manufacturer}
                   onChange={handleChange}
                   required
-                  className="block w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all duration-200"
+                  className="block w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition-all text-base font-medium"
                   placeholder="VD: Apple Inc."
                 />
               </div>
 
               {/* Batch Number */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Hash className="w-4 h-4" />
+                <label className="block text-base font-bold text-gray-700 mb-3">
+                  <div className="flex items-center gap-3">
+                    <Hash className="w-5 h-5 text-orange-600" />
                     Số lô sản xuất *
                   </div>
                 </label>
@@ -138,7 +138,7 @@ export default function CreateProduct() {
                   value={formData.batchNumber}
                   onChange={handleChange}
                   required
-                  className="block w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all duration-200"
+                  className="block w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition-all text-base font-medium"
                   placeholder="VD: BATCH-2024-001"
                 />
               </div>
@@ -146,9 +146,9 @@ export default function CreateProduct() {
 
             {/* Manufacture Date */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
+              <label className="block text-base font-bold text-gray-700 mb-3">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-blue-600" />
                   Ngày sản xuất *
                 </div>
               </label>
@@ -158,40 +158,43 @@ export default function CreateProduct() {
                 value={formData.manufactureDate}
                 onChange={handleChange}
                 required
-                className="block w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all duration-200"
+                className="block w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-base font-medium"
               />
             </div>
 
             {/* Info Box */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <p className="text-sm text-blue-800">
-                <strong>Lưu ý:</strong> Sau khi tạo, sản phẩm sẽ được lưu lên Ethereum blockchain. 
-                Hệ thống sẽ tự động tạo mã hash unique và QR code để in lên bao bì sản phẩm.
-              </p>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6">
+              <div className="flex items-start gap-4">
+                <CheckCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+                <p className="text-base text-blue-900 font-medium leading-relaxed">
+                  <strong className="font-bold">Lưu ý:</strong> Sau khi tạo, sản phẩm sẽ được lưu lên Ethereum blockchain. 
+                  Hệ thống sẽ tự động tạo mã hash unique và QR code để in lên bao bì sản phẩm.
+                </p>
+              </div>
             </div>
 
             {/* Submit Buttons */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-4 pt-6">
               <button
                 type="button"
                 onClick={() => navigate('/dashboard')}
-                className="flex-1 px-6 py-3.5 border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-200"
+                className="flex-1 px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-2xl font-bold hover:bg-gray-50 transition-all text-lg"
               >
                 Hủy
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white rounded-xl font-semibold hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl font-bold hover:shadow-2xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-lg"
               >
                 {loading ? (
                   <>
-                    <Loader className="w-5 h-5 animate-spin" />
+                    <Loader className="w-6 h-6 animate-spin" />
                     <span>Đang tạo...</span>
                   </>
                 ) : (
                   <>
-                    <Package className="w-5 h-5" />
+                    <Package className="w-6 h-6" />
                     <span>Tạo sản phẩm</span>
                   </>
                 )}

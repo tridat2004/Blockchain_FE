@@ -58,6 +58,7 @@ export const productAPI = {
 
 export const statsAPI = {
   getStats: () => api.get('/stats'),
+  getChartData: () => api.get('/chart'),
 };
 
 export default api;
