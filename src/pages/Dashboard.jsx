@@ -1,3 +1,4 @@
+// src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -8,7 +9,6 @@ import {
   Package,
   ShieldCheck,
   ShieldAlert,
-  ShieldX,
   Users,
   TrendingUp,
   Activity,
@@ -18,7 +18,6 @@ import {
   User,
   Plus,
   Eye,
-
   AlertTriangle,
   CheckCircle
 } from 'lucide-react';
@@ -81,47 +80,43 @@ export default function Dashboard() {
   };
 
   const statCards = [
-  {
-    title: 'Tổng sản phẩm',
-    value: stats?.totalProducts || 0,
-    icon: Package,
-    color: 'from-blue-500 to-blue-600',
-    bgColor: 'bg-blue-50',
-    iconColor: 'text-blue-600',
-    change: '+12.5%',
-    trend: 'up',
-  },
-  {
-    title: 'Lượt xác thực',
-    value: stats?.totalVerifications || 0,
-    icon: ShieldCheck,
-    color: 'from-green-500 to-green-600',
-    bgColor: 'bg-green-50',
-    iconColor: 'text-green-600',
-    change: '+23.1%',
-    trend: 'up',
-  },
-  {
-    title: 'Sản phẩm chính hãng',
-    value: stats?.totalAuthentic || 0,
-    icon: CheckCircle,
-    color: 'from-emerald-500 to-emerald-600',
-    bgColor: 'bg-emerald-50',
-    iconColor: 'text-emerald-600',
-    change: '+18%',
-    trend: 'up',
-  },
-  {
-    title: 'Phát hiện giả mạo',
-    value: stats?.totalFake || 0,
-    icon: AlertTriangle,
-    color: 'from-red-500 to-red-600',
-    bgColor: 'bg-red-50',
-    iconColor: 'text-red-600',
-    change: stats?.totalFake > 0 ? '+' + stats.totalFake : '0',
-    trend: 'down',
-  },
-];
+    {
+      title: 'Tổng sản phẩm',
+      value: stats?.totalProducts || 0,
+      icon: Package,
+      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      change: '+12.5%',
+      trend: 'up',
+    },
+    {
+      title: 'Lượt xác thực',
+      value: stats?.totalVerifications || 0,
+      icon: ShieldCheck,
+      bgColor: 'bg-green-50',
+      iconColor: 'text-green-600',
+      change: '+23.1%',
+      trend: 'up',
+    },
+    {
+      title: 'Sản phẩm chính hãng',
+      value: stats?.totalAuthentic || 0,
+      icon: CheckCircle,
+      bgColor: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
+      change: '+18%',
+      trend: 'up',
+    },
+    {
+      title: 'Phát hiện giả mạo',
+      value: stats?.totalFake || 0,
+      icon: AlertTriangle,
+      bgColor: 'bg-red-50',
+      iconColor: 'text-red-600',
+      change: stats?.totalFake > 0 ? '+' + stats.totalFake : '0',
+      trend: 'down',
+    },
+  ];
 
   if (loading) {
     return (
@@ -164,38 +159,69 @@ export default function Dashboard() {
               <Plus className="w-5 h-5" />
               Tạo sản phẩm
             </button>
+
+            {/* User Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-3 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-2xl transition-all"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left hidden lg:block">
+                  <p className="text-sm font-bold text-gray-900">{user?.username}</p>
+                  <p className="text-xs text-gray-500">{user?.role || 'Admin'}</p>
+                </div>
+              </button>
+
+              {showUserMenu && (
+                <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border-2 border-gray-200 py-3 z-50">
+                  <div className="px-5 py-4 border-b-2 border-gray-100">
+                    <p className="text-base font-bold text-gray-900">{user?.username}</p>
+                    <p className="text-sm text-gray-500">{user?.email}</p>
+                    <p className="text-xs text-blue-600 font-bold mt-2">Role: {user?.role || 'Admin'}</p>
+                  </div>
+                  
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-5 py-4 hover:bg-red-50 transition-colors text-left"
+                  >
+                    <LogOut className="w-5 h-5 text-red-600" />
+                    <span className="text-base text-red-600 font-bold">Đăng xuất</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-10">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+        {/* Stats Cards - 4 cards đều nhau */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {statCards.map((stat, index) => (
             <div
               key={index}
-              onClick={stat.onClick}
-              className={`bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-gray-100 ${
-                stat.onClick ? 'cursor-pointer' : ''
-              }`}
+              className="bg-white rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-gray-100"
             >
-              <div className="flex items-center justify-between mb-6">
-                <div className={`w-16 h-16 ${stat.bgColor} rounded-2xl flex items-center justify-center shadow-lg`}>
-                  <stat.icon className={`w-9 h-9 ${stat.iconColor}`} />
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-14 h-14 ${stat.bgColor} rounded-2xl flex items-center justify-center shadow-lg`}>
+                  <stat.icon className={`w-7 h-7 ${stat.iconColor}`} />
                 </div>
-                <div className={`flex items-center gap-1.5 text-base font-bold ${
+                <div className={`flex items-center gap-1 text-sm font-bold ${
                   stat.trend === 'up' ? 'text-emerald-600' : 'text-red-600'
                 }`}>
                   {stat.trend === 'up' ? (
-                    <ArrowUpRight className="w-5 h-5" />
+                    <ArrowUpRight className="w-4 h-4" />
                   ) : (
-                    <ArrowDownRight className="w-5 h-5" />
+                    <ArrowDownRight className="w-4 h-4" />
                   )}
                   {stat.change}
                 </div>
               </div>
-              <h3 className="text-gray-600 text-base font-semibold mb-3">{stat.title}</h3>
-              <p className="text-4xl font-bold text-gray-900">{stat.value.toLocaleString()}</p>
+              <h3 className="text-gray-600 text-sm font-semibold mb-2">{stat.title}</h3>
+              <p className="text-3xl font-bold text-gray-900">{stat.value.toLocaleString()}</p>
             </div>
           ))}
         </div>
@@ -233,52 +259,62 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Activity */}
-       
-<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 animate-fade-in">
-  <h2 className="text-lg font-bold text-gray-900 mb-6">Hoạt động gần đây</h2>
-  <div className="space-y-4">
-    {stats?.recentVerifications && stats.recentVerifications.length > 0 ? (
-      stats.recentVerifications.map((verification) => (
-        <div 
-          key={verification.id} 
-          className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${
-            verification.isAuthentic 
-              ? 'hover:bg-green-50 border border-green-100' 
-              : 'hover:bg-red-50 border border-red-100'
-          }`}
-        >
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-            verification.isAuthentic 
-              ? 'bg-green-500' 
-              : 'bg-red-500'
-          }`}>
-            {verification.isAuthentic ? (
-              <ShieldCheck className="w-6 h-6 text-white" />
+        <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
+            <Activity className="w-8 h-8 text-emerald-600" />
+            Hoạt động gần đây
+          </h2>
+          <div className="space-y-4">
+            {stats?.recentVerifications && stats.recentVerifications.length > 0 ? (
+              stats.recentVerifications.map((verification) => (
+                <div 
+                  key={verification.id} 
+                  className={`flex items-center gap-4 p-5 rounded-2xl transition-all hover:shadow-lg ${
+                    verification.isAuthentic 
+                      ? 'bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-200' 
+                      : 'bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200'
+                  }`}
+                >
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg ${
+                    verification.isAuthentic 
+                      ? 'bg-emerald-500' 
+                      : 'bg-red-500'
+                  }`}>
+                    {verification.isAuthentic ? (
+                      <ShieldCheck className="w-6 h-6 text-white" />
+                    ) : (
+                      <ShieldAlert className="w-6 h-6 text-white" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-bold text-base ${
+                      verification.isAuthentic ? 'text-emerald-900' : 'text-red-900'
+                    }`}>
+                      {verification.isAuthentic ? '✅ Sản phẩm chính hãng' : '⚠️ Phát hiện giả mạo'}
+                    </p>
+                    <p className="text-sm text-gray-600 font-medium">
+                      {verification.productName} - {verification.batchNumber}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {verification.location} • {new Date(verification.verifiedAt).toLocaleString('vi-VN')}
+                    </p>
+                  </div>
+                </div>
+              ))
             ) : (
-              <ShieldAlert className="w-6 h-6 text-white" />
+              <p className="text-center text-gray-500 py-12 text-base font-medium">Chưa có hoạt động nào</p>
             )}
           </div>
-          <div className="flex-1">
-            <p className={`font-semibold ${
-              verification.isAuthentic ? 'text-green-900' : 'text-red-900'
-            }`}>
-              {verification.isAuthentic ? '✅ Sản phẩm chính hãng' : '⚠️ Phát hiện giả mạo'}
-            </p>
-            <p className="text-sm text-gray-500">
-              {verification.productName} - {verification.batchNumber}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">
-              {verification.location} • {new Date(verification.verifiedAt).toLocaleString('vi-VN')}
-            </p>
-          </div>
         </div>
-      ))
-    ) : (
-      <p className="text-center text-gray-500 py-8">Chưa có hoạt động nào</p>
-    )}
-  </div>
-</div>
       </div>
+
+      {/* Click outside to close menu */}
+      {showUserMenu && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setShowUserMenu(false)}
+        ></div>
+      )}
     </div>
   );
 }

@@ -35,7 +35,8 @@ export default function ProductList() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const { data } = await productAPI.getAll({ page, limit: 10, search });
+      const { data } = await productAPI.getAll({ page, limit: 6, search });
+      console.log('📦 Products data:', data)
       setProducts(data.products);
       setPagination(data.pagination);
     } catch (error) {
@@ -256,24 +257,53 @@ export default function ProductList() {
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
-              <div className="flex justify-center gap-3">
-                <button
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                  className="px-6 py-3 border-2 border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-gray-700"
-                >
-                  Trước
-                </button>
-                <span className="px-6 py-3 font-bold text-lg text-gray-900">
-                  Trang {page} / {pagination.totalPages}
-                </span>
-                <button
-                  onClick={() => setPage(page + 1)}
-                  disabled={page === pagination.totalPages}
-                  className="px-6 py-3 border-2 border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-gray-700"
-                >
-                  Sau
-                </button>
+              <div  className="flex items-center justify-between gap-6 mt-12" >
+                {/* Info text */}
+                <p className="text-gray-600 font-medium text-base">
+                  Hiển thị <span className="font-bold text-emerald-600">{((page - 1) * 6) + 1}</span> -{' '}
+                  <span className="font-bold text-emerald-600">
+                    {Math.min(page * 6, pagination.total)}
+                  </span>{' '}
+                  trong tổng <span className="font-bold text-gray-900">{pagination.total}</span> lượt
+                </p>
+
+                {/* Pagination buttons */}
+                <div className="flex items-center gap-3">
+                  {/* Button Trước */}
+                  <button
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                    className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+                  >
+                    Trước
+                  </button>
+
+                  {/* Page numbers */}
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={`min-w-[48px] h-12 px-4 rounded-xl font-bold transition-all shadow-md ${
+                          page === pageNum
+                            ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white scale-110 shadow-emerald-500/50'
+                            : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-emerald-300'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Button Sau */}
+                  <button
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === pagination.totalPages}
+                    className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+                  >
+                    Sau
+                  </button>
+                </div>
               </div>
             )}
           </>
